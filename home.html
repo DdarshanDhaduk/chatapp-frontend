@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>My Friends</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #e5ddd5;
+        padding: 200px;
+        padding-top: 10px;
+      }
+
+      h1 {
+        color: #075e54;
+      }
+
+      #friendList {
+        list-style: none;
+        padding: 0;
+      }
+
+      #friendList li {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        margin: 8px 0;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      #friendList li:hover {
+        background: #f0f0f0;
+      }
+
+      .friend-img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+        object-fit: cover;
+      }
+
+      .friend-name {
+        font-size: 18px;
+        color: #333;
+      }
+
+      #noFriends {
+        text-align: center;
+        color: #555;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>My Friends</h1>
+    <ul id="friendList"></ul>
+    <div id="noFriends" style="display: none;">No friends found.</div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const username = params.get("username");
+
+      const token = localStorage.getItem("tokenchat");
+
+      fetch(`http://localhost:8089/home/${username}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const list = document.getElementById("friendList");
+          const noFriendsDiv = document.getElementById("noFriends");
+
+          if (!data || data.length === 0) {
+            noFriendsDiv.style.display = "block";
+          } else {
+            data.forEach((friend) => {
+              const li = document.createElement("li");
+
+          
+              li.onclick = () => {
+                window.location.href = `chat.html?username=${username}&friendId=${friend.friendUsername}`;
+              };
+
+
+              li.innerHTML = `
+                <img src="image/chat.app.jpeg" alt="profile" class="friend-img">
+                <div>
+                  <span class="friend-name">${friend.friendUsername}</span><br>
+                  <small>${friend.lastMessage || ''}</small>
+                </div>
+                ${
+                  friend.unreadCount > 0
+                    ? `<span style="margin-left:auto; background:#25d366; color:white; border-radius:12px; padding:2px 6px; font-size:12px;">${friend.unreadCount}</span>`
+                    : ""
+                }
+              `;
+
+              list.appendChild(li);
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          document.getElementById("noFriends").innerText =
+            "Error loading friends.";
+          document.getElementById("noFriends").style.display = "block";
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Register Chatapp</h2>
+    <form id="register">
+    <input type="text" id="register-username" placeholder="username">
+    <input type="password" id="register-password" placeholder="password">
+    <button type="submit">Register</button>
+    </form>
+    <a href="login.html" class="link">Already have an account? Login</a>
+  </div>
+
+  <script>
+document.getElementById('register').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+             const data1 = {
+                username: document.getElementById('register-username').value,
+                password: document.getElementById('register-password').value,
+            };
+
+           if (!data1.username || !data1.password) {
+              alert("Please All Data Complete");
+              return;
+               }
+
+
+              const response = await fetch('http://localhost:8089/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                  credentials: "include",
+                body: JSON.stringify(data1)
+            });
+
+              if (response.ok) {
+
+                window.location.href = 'login.html';
+        } else {
+
+            const result = await response.json();
+            alert(result.message || 'Login failed');
+        }
+    
+    });
+  </script>
+</body>
+</html>

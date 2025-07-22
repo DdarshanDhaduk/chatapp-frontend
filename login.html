@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Login To Chatapp</h2>
+    <form id="loginForm">
+    <input type="text" id="login-username" placeholder="username">
+    <input type="password" id="login-password" placeholder="password">
+    <button type="submit">Login</button>  
+    </form>
+    <a href="register.html" class="link">Dont't have an account? Register</a>
+  </div>
+
+  <script>
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+             const data1 = {
+                username: document.getElementById('login-username').value,
+                password: document.getElementById('login-password').value,
+            };
+
+            localStorage.clear();
+            localStorage.clear();
+
+            if (!data1.username || !data1.password) {
+              alert("Please All Data Complete");
+              return;
+              }
+
+
+              const response = await fetch('http://localhost:8089/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                  credentials: "include",
+                body: JSON.stringify(data1)
+            });
+                
+          if (!response.ok) {
+            alert("Login failed");
+            return;
+        }
+
+        localStorage.removeItem('tokenchat');
+        const responseData = await response.json();
+        const token = responseData.token;
+        localStorage.setItem('tokenchat', token);
+        
+        if (!token) {
+            alert("Token not found in response.");
+            return;
+        }
+
+        const payload = parseJwt(token);
+
+        if (payload) {
+              const username = payload.sub; 
+              console.log("Username:", username);
+            //    window.location.href = `home.html?username=${encodeURIComponent(username)}`;
+                window.location.href = `home.html?username=${username}`;
+        } 
+        else {
+              alert("Invalid token format.");
+             }
+        
+        });
+
+
+        function parseJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return null;
+    }
+}
+  </script>
+</body>
+</html>
